@@ -10,18 +10,38 @@ import (
 )
 
 type EnumDeclaration struct {
-	Name   string       `parser:"'typedef' 'enum' @Ident"`
-	Values []*EnumValue `parser:"'{' (@@)+ '}' Ident ';'"`
+	Name   string       `parser:"'typedef' 'enum' @Ident '{'"`
+	Values []*EnumValue `parser:" (@@)+ '}' Ident ';'"`
 
 	// private
 	decl *Declaration
 }
 
+type EnumValue struct {
+	Key   string         `parser:"@Ident"`
+	Value *EnumValueDecl `parser:"('=' @@)? ','?"`
+}
+
+type EnumValueDecl struct {
+	Value     string `parser:"@Hex | @Int"`
+	LeftShift *int   `parser:"('<' '<' @Int)?"`
+}
+
+func (e *EnumValueDecl) Process() {
+	if e.LeftShift != nil {
+		e.Value += " << " + strconv.Itoa(*e.LeftShift)
+	}
+}
+
 func (d *EnumDeclaration) Process(decl *Declaration) error {
 	d.decl = decl
 	for index, value := range d.Values {
-		if value.Value == "" {
-			value.Value = strconv.Itoa(index)
+		if value.Value == nil {
+			value.Value = &EnumValueDecl{
+				Value: strconv.Itoa(index),
+			}
+		} else {
+			value.Value.Process()
 		}
 	}
 	decl.library.enums.Add(d.Name)
@@ -56,9 +76,4 @@ func (d *EnumDeclaration) Generate(packageName string, w io.Writer) error {
 		log.Fatalln(err)
 	}
 	return tmpl.Execute(w, &data)
-}
-
-type EnumValue struct {
-	Key   string `parser:"@Ident"`
-	Value string `parser:"('=' @Hex)? ','?"`
 }

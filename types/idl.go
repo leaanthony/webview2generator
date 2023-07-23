@@ -38,7 +38,7 @@ type Import struct {
 }
 
 type LibraryHeader struct {
-	UUID string `parser:"'uuid' '(' @UUID ')' ',' 'version' '(' Number ')'"`
+	UUID string `parser:"'uuid' '(' @UUID ')' ',' 'version' '(' Int ('.' Int)? ')'"`
 }
 
 type Library struct {

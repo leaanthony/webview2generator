@@ -4,6 +4,6 @@ type {{.Name}} uint32
 
 const (
 	{{- range .Values}}
-	{{.Key}} = {{.Value}}
+	{{.Key}} = {{.Value.Value}}
 	{{- end}}
 )

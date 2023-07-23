@@ -19,5 +19,6 @@ func TestParseIDL(t *testing.T) {
 	i.NoErr(err)
 	command := exec.Command("go", "fmt", "./...")
 	err = command.Run()
+	println(err.Error())
 	i.NoErr(err)
 }
